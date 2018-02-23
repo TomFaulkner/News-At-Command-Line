@@ -7,26 +7,26 @@ from .config_reader import ConfigurationReader
 
 
 class NewsPulling:
-    """This class is used to pull news from the internet depending on the source specified """
+    """Pull news from the internet depending on the source specified."""
 
-    def __init__(self, newsSource):
-        self.Source = newsSource
+    def __init__(self, source):
+        self.source = source
 
     def pull_news(self):
         config = ConfigurationReader()
-        self.__APIKey = config.APIKEY
         self.__Limit = config.limit
         url = 'https://newsapi.org/v1/articles?source=' + \
-            self.Source + '&sortBy=top&apiKey=' + self.__APIKey
+            self.source + '&sortBy=top&apiKey=' + config.APIKEY
         try:
             req = requests.get(url)
-            if(req.status_code == 200):
+            print(req)
+            if req.status_code == 200:
                 return req
             else:
-                print(
-                    "There is some issue in connecting to the internet. Please check your firewall or internet")
+                print("There is some issue in connecting to the internet."
+                      "Please check your firewall or internet")
         except ConnectionError as e:
-            print("A connection Attempt failed")
+            print("A connection attempt failed")
             print(e.message)
             sys.exit()
 
@@ -52,8 +52,8 @@ class NewsPulling:
                 Article_url = str(article['url'], 'utf-8')
                 DateofPublication = str(article['publishedAt'], 'utf-8')
                 Author = str(article['author'], 'utf-8')
-                FilteredArticles.append(
-                    [description, title, Article_url, DateofPublication, Author])
+                FilteredArticles.append([description, title, Article_url,
+                                         DateofPublication, Author])
             else:
                 description = article['description']
                 # print description
@@ -62,7 +62,8 @@ class NewsPulling:
                 DateofPublication = article['publishedAt']
                 Author = article['author']
                 FilteredArticles.append(
-                    [description, title, Article_url, DateofPublication, Author])
+                    [description, title, Article_url,
+                     DateofPublication, Author])
         return FilteredArticles
 
     def beautify_articles(self):

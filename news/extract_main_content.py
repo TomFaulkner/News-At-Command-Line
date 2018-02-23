@@ -1,19 +1,12 @@
 import requests
 import textwrap
 
-from .config_reader import ConfigurationReader
-from .extractor import *
+from .reader_plugins.plugin_registration import sites
 
 
 class ExtractMainContent:
     def __init__(self, source, articleurl):
-        self.extractorlist = [HuffingtonPost(), NYT(), BBC(
-        ), BloomBerg(), Guardian(), TheHindu(), TimesOfIndia()]
-        websites = ConfigurationReader().websites_supported
-        self.Mapping = {}
-        for index, website in enumerate(websites):
-            self.Mapping[website] = self.extractorlist[index]
-        self.Source = source
+        self.source = source
         self.url = articleurl
         self.textWrap = textwrap.TextWrapper(
             initial_indent='\t', subsequent_indent='\t', width=100)
@@ -25,14 +18,9 @@ class ExtractMainContent:
         req = requests.get(self.url, headers=headers)
         return req.text
 
-    # unused, but may be useful in the future
-    # def AddExtractorList(self, extractor):
-    #     self.extractorlist.append(extractor)
-
     def _extract(self):
-        self.ExtractStrategy = self.Mapping[self.Source]
         text = self.download()
-        return self.ExtractStrategy.extractor(text)
+        return sites[self.source]().extractor(text)
 
     def beautify(self):
         title, output = self._extract()

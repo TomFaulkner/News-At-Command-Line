@@ -4,8 +4,8 @@ import sys
 from enum import Enum
 
 from .news_pulling import NewsPulling
-from .config_reader import ConfigurationReader
 from .extract_main_content import ExtractMainContent
+from .reader_plugins.plugin_registration import sites
 
 
 class SelectionStatus(Enum):
@@ -15,7 +15,7 @@ class SelectionStatus(Enum):
 
 
 def news_sources():
-    news_sources = ConfigurationReader().websites_supported
+    news_sources = tuple(sites.keys())
     return news_sources
 
 
@@ -91,7 +91,9 @@ def main():
         source_choice = prompt_for_source(sources)
 
         while True:
-            puller = NewsPulling(sources[source_choice])
+            # TODO: This is ugly, but functional.
+            # Getting the name of thesource as used in the API from the plugin.
+            puller = NewsPulling(sites[sources[source_choice]]().source_name)
             articles = puller.beautify_articles()
             status, article_selection = prompt_for_article(max=len(articles))
             if status == SelectionStatus.EXIT:
